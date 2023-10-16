@@ -5,38 +5,27 @@ import LogoComponent from "./logo";
 
 const MAX_HEAD_TILT_X = 400;
 const MAX_HEAD_TILT_Y = 400;
+const HALF = 0.5;
+const FIRST_ITEM = 0;
 
-const Logo = memo(function Logo({ size, faces, preventScroll }) {
+const Logo = memo(function Logo({ size, faces, isInteractive, preventScroll }) {
   const [coords, setCoords] = useState({ x: 0, y: 0 });
 
   const logo = useRef();
 
-  let center = null;
-  let moveEvent = null;
-
-  const onMove = (event) => {
-    const { target, pageX, pageY } =
-      moveEvent === "touchmove" ? event.touches[0] : event;
-
-    if (preventScroll && closestAncestor(target, "logo")) {
-      event.preventDefault();
+  useEffect(() => {
+    if (!isInteractive) {
+      return;
     }
 
-    setCoords({
-      x: saturate(pageX - center.x, MAX_HEAD_TILT_X),
-      y: saturate(pageY - center.y, MAX_HEAD_TILT_Y),
-    });
-  };
-
-  useEffect(() => {
     const { left, top, width, height } = logo.current.getBoundingClientRect();
 
-    center = {
-      x: window.scrollX + left + width / 2,
-      y: window.scrollY + top + height / 2,
+    const center = {
+      x: window.scrollX + left + width * HALF,
+      y: window.scrollY + top + height * HALF,
     };
 
-    moveEvent = isTouchDevice() ? "touchmove" : "mousemove";
+    const moveEvent = isTouchDevice() ? "touchmove" : "mousemove";
     document.addEventListener(moveEvent, onMove, {
       passive: !preventScroll,
     });
@@ -44,7 +33,21 @@ const Logo = memo(function Logo({ size, faces, preventScroll }) {
     return () => {
       document.removeEventListener(moveEvent, onMove);
     };
-  }, []);
+
+    function onMove(event) {
+      const { target, pageX, pageY } =
+        moveEvent.current === "touchmove" ? event.touches[FIRST_ITEM] : event;
+
+      if (preventScroll && closestAncestor(target, "logo")) {
+        event.preventDefault();
+      }
+
+      setCoords({
+        x: saturate(pageX - center.x, MAX_HEAD_TILT_X),
+        y: saturate(pageY - center.y, MAX_HEAD_TILT_Y),
+      });
+    }
+  }, [isInteractive, preventScroll]);
 
   return <LogoComponent size={size} faces={faces} {...coords} ref={logo} />;
 });
@@ -85,6 +88,7 @@ Logo.propTypes = {
       eye: PropTypes.bool,
     }).isRequired
   ).isRequired,
+  isInteractive: PropTypes.bool.isRequired,
   preventScroll: PropTypes.bool.isRequired,
 };
 
@@ -94,6 +98,7 @@ Logo.defaultProps = {
     { image: "I", reverse: false, eye: true },
     { image: "C", reverse: false, eye: false },
   ],
+  isInteractive: false,
   preventScroll: false,
 };
 
