@@ -67,6 +67,9 @@ devDependencies:
   prop-types:
     specifier: 15.8.1
     version: 15.8.1
+  rimraf:
+    specifier: ^5.0.5
+    version: 5.0.5
   storybook:
     specifier: 7.4.6
     version: 7.4.6
@@ -8085,6 +8088,14 @@ packages:
     hasBin: true
     dependencies:
       glob: 7.2.3
+    dev: true
+
+  /rimraf@5.0.5:
+    resolution: {integrity: sha512-CqDakW+hMe/Bz202FPEymy68P+G50RfMQK+Qo5YUqc9SPipvbGjCGKd0RSKEelbsfQuw3g5NZDSrlZZAJurH1A==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dependencies:
+      glob: 10.3.10
     dev: true
 
   /rollup@3.29.4:
